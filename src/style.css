@@ -1,0 +1,50 @@
+
+.login-container{
+    display: flex;
+    justify-content: center;
+}
+
+.login-win{
+    position: absolute;
+    background-color: rgba(135, 206, 250, 0.3);
+    top: 35%;
+    padding: 50px;
+    border-radius: 40px;
+}
+
+.login-win input{
+    /* border: 0; */
+    margin:6px 0;
+    width: 80%;
+}
+
+.login-win button{
+    margin: 0 10px;
+}
+
+.lobby-label{
+    height: 40px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.lobby-main div{
+    height: 600px;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 40px;
+    
+}
+
+.blue{
+  background-color: blue;
+}
+
+.green{
+    background-color: green;
+  }
+
+  .yellow{
+      background-color: yellow;
+  }
