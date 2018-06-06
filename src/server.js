@@ -14,31 +14,32 @@ var pool = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "1205",
-  database : 'tetris'
+  // host: "webprog.database.windows.net",
+  // user: "yzhsieh@webprog",
+  // password: "Smalldog1205",
+  database : 'tetris',
+  port: 3306,
 });
-
-// con.connect(function(err) {
-//   if (err) throw err;
-//   console.log("Connected!");
-//   name = "John"
-//   birth = "19941205"
-
-//   var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
-//   con.query(sql, function (err, result) {
-//     if (err) throw err;
-//     console.log(result)
-//   });
-// });
+////////////////////
+// post = {name:"Jack", birth:"19941205", wincount:0, losecount:0, score:0}
+// pool.query("INSERT INTO users SET ?", post, (err, result, fields) => {
+//   if(err) throw err;
+//   console.log('inserted');
+//   console.log(result);
+//   console.log(fields);
+//   fn(result)            
+// })
+//////////////////////
 
 // variables
 // [id, roomName, user1, user2 (if exist)]
-// var currentRoom = []
-var currentRoom = [
-  [0, "房名一號", "Jack"],
-  [1, "這也是房名", "John"],
-  [2, "這還是房名", "Dick"],
-  [3, "這又是房名", "Kevin"],
-]
+var currentRoom = []
+// var currentRoom = [
+//   [0, "房名一號", "Jack"],
+//   [1, "這也是房名", "John"],
+//   [2, "這還是房名", "Dick"],
+//   [3, "這又是房名", "Kevin"],
+// ]
 var currentUser = []
 var username;
 ///// room id generator
@@ -70,14 +71,12 @@ io.on('connection', socket => {
     //// make a SQL query
       var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
       pool.query(sql, (err, res) => {
-        console.log("in Login query")
-        console.log(res);
+        // console.log("in Login query")
         
         if( res.length !== 0){
           currentUser.push(res[0].name)
           rnt = {userData:res[0], lobbyData: currentRoom}
           console.log(rnt);
-          
           io.emit("update sideWin", currentUser)
           fn(rnt)
           console.log(currentUser);
@@ -94,17 +93,17 @@ io.on('connection', socket => {
     //// make a SQL query
       var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
       pool.query(sql, (err, res) => {
-        console.log("in Register query")
-        console.log(res);
+        // console.log("in Register query")
+        // console.log(res);
         if( res.length === 0){
           console.log("new profile, insert to sql")
           post = {name:name, birth:birth, wincount:0, losecount:0, score:0}
           pool.query("INSERT INTO users SET ?", post, (err, result, fields) => {
             if(err) throw err;
-            console.log('inserted');
-            console.log(result);
-            console.log(fields);
-            fn(result)            
+            // console.log('inserted');
+            // console.log(result);
+            // console.log(fields);
+            // fn(result)            
           })
         }
         else{
@@ -121,7 +120,10 @@ io.on('connection', socket => {
   socket.on("create room", (arr, fn) => {
     let user = arr[0]
     let roomName = arr[1]
-    let tmp = [genRoomId(), roomName, user]
+    let roomId = genRoomId()
+    let tmp = [roomId, roomName, user]
+    socket.join(roomId)
+    console.log(io.sockets.adapter.rooms);
     currentRoom.push(tmp)
     console.log('created room:', tmp);
     // return room data
@@ -133,6 +135,7 @@ io.on('connection', socket => {
     let user = arr[0]
     let roomId = arr[1]
     let roomPtr = getRoomById(roomId)
+    socket.join(roomId)
     console.log('in enter room function');
     console.log('user:', user, "roomid:", roomId);
     console.log(roomPtr);
@@ -144,6 +147,10 @@ io.on('connection', socket => {
         console.log('entered');
         roomPtr.push(user)
         fn(roomPtr)
+        io.emit("update lobby", currentRoom)
+        io.to(roomId).emit("update room", roomPtr)
+      console.log(io.sockets.adapter.rooms);
+        
       }
     }
     console.log(roomPtr);
@@ -152,6 +159,7 @@ io.on('connection', socket => {
   socket.on("leave room", (arr, fn) => {
     let userId = arr[0];
     let roomId = arr[1];
+    socket.leave(roomId)
     let roomPtr = getRoomById(roomId);
     if(roomPtr != undefined){
       roomPtr.splice(roomPtr.indexOf(userId), 1)
@@ -161,6 +169,8 @@ io.on('connection', socket => {
         currentRoom.splice(currentRoom.indexOf(roomPtr), 1)
       }
       console.log(currentRoom);
+      io.to(roomId).emit("update room", roomPtr)
+      console.log(io.sockets.adapter.rooms);
       
       io.emit("update lobby", currentRoom)
       fn(1)
@@ -169,8 +179,6 @@ io.on('connection', socket => {
 
 
   socket.on("get sideWinData", (fn) => {
-    console.log('someone requested sideWinData');
-    
     fn(currentUser)
   })
 

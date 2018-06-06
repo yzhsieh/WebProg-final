@@ -13,6 +13,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 class MAIN extends React.Component{
     constructor(props){
         super(props)
+        
         this.state = {
             endpoint: "http://127.0.0.1:3010",
             userName : 0,
@@ -22,14 +23,18 @@ class MAIN extends React.Component{
             sideWinData: 0,
             roomState: 0, // [roomId, roomName, user1, user2]
             lobbyData: 0,
+            io : socketIOClient("http://127.0.0.1:3010"),
         }
     }
-
+    
+    // componentDidMount(){
+    //     const io = socketIOClient(this.state.endpoint)
+    // }
 
     loginBtn = (name, birth) => {
         this.setState({userName:name, userBirth: birth})
-        const io = socketIOClient(this.state.endpoint)
-        io.emit("login", [name, birth], (res) => {
+        // const io = socketIOClient(this.state.endpoint)
+        this.state.io.emit("login", [name, birth], (res) => {
             console.log('in login method');
             console.log(res);            
             if(res === 0){
@@ -41,25 +46,30 @@ class MAIN extends React.Component{
             }
         })
 
-        io.emit("get sideWinData", (res) => {
+        this.state.io.emit("get sideWinData", (res) => {
             console.log(res);
             this.setState({sideWinData:res})
             
         })
 
-        io.on("update sideWin", (data) => {
+        this.state.io.on("update sideWin", (data) => {
             this.setState({sideWinData:data})
         })
 
-        io.on("update lobby", (data) => {
+        this.state.io.on("update lobby", (data) => {
             this.setState({lobbyData: data})
+        })
+
+        this.state.io.on("update room", (data) => {
+            console.log('update room status');
+            this.setState({roomState: data})
         })
     }
 
     registerBtn = (name, birth) => {
         this.setState({userName:name, userBirth: birth})
-        const io = socketIOClient(this.state.endpoint)
-        io.emit("register", [this.state.userName, this.state.userBirth], (res) => {
+        // const io = socketIOClient(this.state.endpoint)
+        this.state.io.emit("register", [this.state.userName, this.state.userBirth], (res) => {
             console.log('in login method');
             console.log(res);
             
@@ -78,8 +88,8 @@ class MAIN extends React.Component{
         // TODO: replace this ugly prompt
         var roomName = prompt("Please enter the room name")
         if(roomName !== null){
-            const io = socketIOClient(this.state.endpoint)
-            io.emit("create room", [this.state.userName, roomName], (res) => {
+            // const io = socketIOClient(this.state.endpoint)
+            this.state.io.emit("create room", [this.state.userName, roomName], (res) => {
                 if(res !== 0){
                     this.setState({currentState: "room", roomState: res})
                 }
@@ -89,8 +99,8 @@ class MAIN extends React.Component{
     }
 
     enterRoomBtn = (roomid) =>{
-        const io = socketIOClient(this.state.endpoint)
-        io.emit("enter room", [this.state.userName, roomid], (res) => {
+        // const io = socketIOClient(this.state.endpoint)
+        this.state.io.emit("enter room", [this.state.userName, roomid], (res) => {
             console.log(res);
             
             if(res !== 0){
@@ -100,8 +110,8 @@ class MAIN extends React.Component{
     }
 
     autoEnterBtn = () => {
-        const io = socketIOClient(this.state.endpoint)
-        io.emit("auto enter", this.state.userName, (res) => {
+        // const io = socketIOClient(this.state.endpoint)
+        this.state.io.emit("auto enter", this.state.userName, (res) => {
             if(res !== 0){
                 //TODO
             }
@@ -110,8 +120,8 @@ class MAIN extends React.Component{
 
     leaveRoomBtn = () => {
         // TODO
-        const io = socketIOClient(this.state.endpoint)
-        io.emit("leave room", [this.state.userName, this.state.roomState[0]], (res) => {
+        // const io = socketIOClient(this.state.endpoint)
+        this.state.io.emit("leave room", [this.state.userName, this.state.roomState[0]], (res) => {
             if(res === 1){
                 this.setState({currentState:"lobby", roomState: 0})
             }

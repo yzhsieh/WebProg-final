@@ -17,6 +17,10 @@ class Room extends Component{
         )
     }
 
+    componentDidMount = () => {
+        document.title = "in Room | WebProg final"
+    }
+
     render(){
         if(this.props.userData === 0){
             console.log('data === 0');

@@ -21,6 +21,9 @@ class Lobby extends Component{
         )
     }
 
+    componentDidMount = () => {
+        document.title = "Lobby | WebProg final"
+    }
 
     render(){
         if(this.props.userData === 0){
