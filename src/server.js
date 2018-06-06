@@ -6,13 +6,11 @@ const socketIO = require('socket.io')
 const app = express()
 const server = http.createServer(app)
 const io = socketIO(server)
-// import message from 'message.js';
-// [timestamp, sender, receiver, textcontent]
-// 1526137011 <--->  2018/5/12 22:56:51
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 
-var con = mysql.createConnection({
+var pool = mysql.createPool({
+  connectionLimit: 64,
   host: "localhost",
   user: "root",
   password: "1205",
@@ -22,76 +20,164 @@ var con = mysql.createConnection({
 // con.connect(function(err) {
 //   if (err) throw err;
 //   console.log("Connected!");
-//   con.query("CREATE DATABASE tetris", function (err, result) {
+//   name = "John"
+//   birth = "19941205"
+
+//   var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
+//   con.query(sql, function (err, result) {
 //     if (err) throw err;
-//     console.log("Database created");
+//     console.log(result)
 //   });
 // });
 
+// variables
+// [id, roomName, user1, user2 (if exist)]
+// var currentRoom = []
+var currentRoom = [
+  [0, "房名一號", "Jack"],
+  [1, "這也是房名", "John"],
+  [2, "這還是房名", "Dick"],
+  [3, "這又是房名", "Kevin"],
+]
+var currentUser = []
 var username;
+///// room id generator
+function* idMaker() {
+  var index = 0;
+  while(true)
+    yield index++;
+}
+var gen = idMaker();
+function genRoomId() {
+  return gen.next().value
+}
+/////
+
+getRoomById = (id) => {
+  // TEST 
+  for(let i = 0; i<currentRoom.length; i++){
+    if(currentRoom[i][0] == id)
+      return currentRoom[i]
+  }
+}
+
 io.on('connection', socket => {
-  socket.on("set id", (msg) =>{
-    console.log(msg, 'connected')
-    username = msg;
-    socket.join(msg)
-
-
-    // io.to(msg).emit("set side win", rnt)
-  })
-
-  socket.on("request sideWinData", (name, fn) => {
-
-    var rnt = getSideWinData(name)
-    // console.log(rnt)
-    fn(rnt)
-  })
-
-  function getSideWinData(name){
-    var rnt = []
-    console.log(name)
-    
-    for(let i = 0; i < database.length ; i++){
-        if(database[i].sender == name || database[i].receiver == name){
-            rnt.push([database[i].timestamp, database[i].sender, database[i].receiver, database[i].content]);
-            // rnt.push(database[i]);
+  socket.on("login", (msg, fn) =>{
+    username = msg[0]
+    name = msg[0];
+    birth = msg[1];
+    console.log(name, birth)
+    //// make a SQL query
+      var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
+      pool.query(sql, (err, res) => {
+        console.log("in Login query")
+        console.log(res);
+        
+        if( res.length !== 0){
+          currentUser.push(res[0].name)
+          rnt = {userData:res[0], lobbyData: currentRoom}
+          console.log(rnt);
+          
+          io.emit("update sideWin", currentUser)
+          fn(rnt)
+          console.log(currentUser);
         }
-    }
-    return rnt
-  }
-
-
-  function getChatWinData(sender, receiver){ // sender and receiver is fake here
-    var rnt = []
-    for(let i = 0; i < database.length ; i++){
-      if(database[i].sender == sender && database[i].receiver == receiver){
-          rnt.push([database[i].timestamp, database[i].sender, database[i].receiver, database[i].content]);
-      }
-      else if(database[i].sender == receiver && database[i].receiver == sender){
-        rnt.push([database[i].timestamp, database[i].sender, database[i].receiver, database[i].content]);
-    }
-  }
-  return rnt;
-  }
-  socket.on("request chatWinData", (arr, fn) => {
-    console.log(arr)
-    var rnt = getChatWinData(arr[0], arr[1])
-    console.log(rnt)
-    fn(rnt)
+        else{
+          fn(0)
+        }
+      })
   })
 
-  // not test yet (especially for room function)
-  socket.on("post chat", (arr, fn) => {
-    database.push(new message(0, arr[0], arr[1], arr[2]))
-    var rnt = getChatWinData(arr[0], arr[1])
-    var sideData1 = getSideWinData(arr[0])
-    var sideData2 = getSideWinData(arr[1])
-    socket.to(arr[0]).emit("update chatWin", [rnt, sideData1])
-    socket.to(arr[1]).emit("update chatWin", [rnt, sideData2])
+  socket.on("register", (msg, fn) =>{
+    name = msg[0];
+    birth = msg[1];
+    //// make a SQL query
+      var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
+      pool.query(sql, (err, res) => {
+        console.log("in Register query")
+        console.log(res);
+        if( res.length === 0){
+          console.log("new profile, insert to sql")
+          post = {name:name, birth:birth, wincount:0, losecount:0, score:0}
+          pool.query("INSERT INTO users SET ?", post, (err, result, fields) => {
+            if(err) throw err;
+            console.log('inserted');
+            console.log(result);
+            console.log(fields);
+            fn(result)            
+          })
+        }
+        else{
+          console.log('The account is already exist');
+          fn(0)
+        }
+      })
+  })
+
+  socket.on("get room list", (fn) => {
+    fn(currentRoom)
+  })
+
+  socket.on("create room", (arr, fn) => {
+    let user = arr[0]
+    let roomName = arr[1]
+    let tmp = [genRoomId(), roomName, user]
+    currentRoom.push(tmp)
+    console.log('created room:', tmp);
+    // return room data
+    io.emit("update lobby", currentRoom)
+    fn(tmp)
+  })
+
+  socket.on("enter room", (arr, fn) => {
+    let user = arr[0]
+    let roomId = arr[1]
+    let roomPtr = getRoomById(roomId)
+    console.log('in enter room function');
+    console.log('user:', user, "roomid:", roomId);
+    console.log(roomPtr);
+    if(roomPtr !== undefined){
+      // check if room is full
+      if(roomPtr.length == 4)
+        fn(0)
+      else{
+        console.log('entered');
+        roomPtr.push(user)
+        fn(roomPtr)
+      }
+    }
+    console.log(roomPtr);
+  })
+
+  socket.on("leave room", (arr, fn) => {
+    let userId = arr[0];
+    let roomId = arr[1];
+    let roomPtr = getRoomById(roomId);
+    if(roomPtr != undefined){
+      roomPtr.splice(roomPtr.indexOf(userId), 1)
+      console.log('in leave room function');
+      if(roomPtr.length == 2){
+        console.log('there is no person in room, remove it');
+        currentRoom.splice(currentRoom.indexOf(roomPtr), 1)
+      }
+      console.log(currentRoom);
+      
+      io.emit("update lobby", currentRoom)
+      fn(1)
+    }
+  })
+
+
+  socket.on("get sideWinData", (fn) => {
+    console.log('someone requested sideWinData');
+    
+    fn(currentUser)
   })
 
 
   socket.on('disconnect', () => {
     console.log(username, 'disconnected')
+    currentUser.splice(currentUser.indexOf(username), 1)
   })
 })
 
