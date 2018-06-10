@@ -7,30 +7,33 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIO(server)
 var bodyParser = require('body-parser');
-var mysql = require('mysql');
+var mysql = require('mysql2');
 
-var pool = mysql.createPool({
-  connectionLimit: 64,
-  host: "localhost",
-  user: "root",
-  password: "1205",
-  // host: "webprog.database.windows.net",
-  // user: "yzhsieh@webprog",
-  // password: "Smalldog1205",
-  database : 'tetris',
+var config  = {
+  host: "webprog-mysql.mysql.database.azure.com",
+  user: "yzhsieh@webprog-mysql",
+  password: "Smalldog1205",
+  database : 'tetris', 
   port: 3306,
-});
-////////////////////
-// post = {name:"Jack", birth:"19941205", wincount:0, losecount:0, score:0}
-// pool.query("INSERT INTO users SET ?", post, (err, result, fields) => {
-//   if(err) throw err;
-//   console.log('inserted');
-//   console.log(result);
-//   console.log(fields);
-//   fn(result)            
-// })
-//////////////////////
+  ssl: true
+  
+}
 
+const conn = new mysql.createConnection(config);
+
+
+// conn.connect(
+//   function (err) { 
+//   if (err) { 
+//       console.log("!!! Cannot connect !!! Error:");
+//       throw err;
+//   }
+//   });
+//   conn.query('CREATE TABLE users (name VARCHAR(255), birth INTEGER, wincount INTEGER, losecount INTEGER, score INTEGER);', 
+//   function (err, results, fields) {
+//       if (err) throw err;
+//   console.log('Created users table.');
+// })
 // variables
 // [id, roomName, user1, user2 (if exist)]
 var currentRoom = []
@@ -70,8 +73,12 @@ io.on('connection', socket => {
     console.log(name, birth)
     //// make a SQL query
       var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
-      pool.query(sql, (err, res) => {
-        // console.log("in Login query")
+      conn.query(sql, (err, res) => {
+        console.log("in Login query")
+        console.log(err);
+        console.log(res);
+        
+        
         
         if( res.length !== 0){
           currentUser.push(res[0].name)
@@ -92,13 +99,13 @@ io.on('connection', socket => {
     birth = msg[1];
     //// make a SQL query
       var sql = mysql.format("SELECT * FROM `users` WHERE `name` = ? and `birth` = ?", [name, birth])
-      pool.query(sql, (err, res) => {
-        // console.log("in Register query")
-        // console.log(res);
-        if( res.length === 0){
+      conn.query(sql, (err, res) => {
+        console.log("in Register query")
+        console.log(res);
+        if( res === undefined || res.length === 0 ){
           console.log("new profile, insert to sql")
           post = {name:name, birth:birth, wincount:0, losecount:0, score:0}
-          pool.query("INSERT INTO users SET ?", post, (err, result, fields) => {
+          conn.query("INSERT INTO users SET ?", post, (err, result, fields) => {
             if(err) throw err;
             // console.log('inserted');
             // console.log(result);
