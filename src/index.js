@@ -8,6 +8,7 @@ import registerServiceWorker from './registerServiceWorker';
 import socketIOClient from "socket.io-client";
 import {Container, Col, Row} from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Tetris from './tetris-client';
 
 
 class MAIN extends React.Component{
@@ -219,5 +220,7 @@ class SideWin extends React.Component{
 
     }
 }
-ReactDOM.render(<MAIN />, document.getElementById('root'));
+
+// ReactDOM.render(<MAIN />, document.getElementById('root'));
+ReactDOM.render(<Tetris />, document.getElementById('root'));
 registerServiceWorker();
