@@ -6,75 +6,85 @@ import Lobby from './Lobby'
 import Room from './Room'
 import registerServiceWorker from './registerServiceWorker';
 import socketIOClient from "socket.io-client";
-import {Container, Col, Row} from 'reactstrap';
+import { Container, Col, Row } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Tetris from './tetris-client';
 
 
-class MAIN extends React.Component{
-    constructor(props){
+class MAIN extends React.Component {
+    constructor(props) {
         super(props)
-        
+
         this.state = {
-            endpoint: "http://127.0.0.1:3010",
-            userName : 0,
+            // endpoint: "http://127.0.0.1:3010",
+            userName: 0,
             userBirth: 0,
             userData: 0,
             currentState: "login", // login, lobby, room, playing
             sideWinData: 0,
             roomState: 0, // [roomId, roomName, user1, user2]
             lobbyData: 0,
-            io : socketIOClient("http://127.0.0.1:3010"),
+            io: socketIOClient("http://webprog-final-tetris.herokuapp.com:29194/"),
         }
+        this.firstFlagForTetris= 1
+            
     }
-    
+
     // componentDidMount(){
     //     const io = socketIOClient(this.state.endpoint)
     // }
 
     loginBtn = (name, birth) => {
-        this.setState({userName:name, userBirth: birth})
+        this.setState({ userName: name, userBirth: birth })
         // const io = socketIOClient(this.state.endpoint)
         this.state.io.emit("login", [name, birth], (res) => {
             console.log('in login method');
-            console.log(res);            
-            if(res === 0){
+            console.log(res);
+            if (res === 0) {
                 // TODO: inplement login fail views and methods
                 console.log("Login failed!!")
             }
-            else{
-                this.setState({currentState: "lobby", userData:res["userData"], lobbyData:res["lobbyData"]})
+            else {
+                this.setState({ currentState: "lobby", userData: res["userData"], lobbyData: res["lobbyData"] })
             }
         })
 
         this.state.io.emit("get sideWinData", (res) => {
             console.log(res);
-            this.setState({sideWinData:res})
-            
+            this.setState({ sideWinData: res })
+
         })
 
         this.state.io.on("update sideWin", (data) => {
-            this.setState({sideWinData:data})
+            this.setState({ sideWinData: data })
         })
 
         this.state.io.on("update lobby", (data) => {
-            this.setState({lobbyData: data})
+            this.setState({ lobbyData: data })
         })
 
         this.state.io.on("update room", (data) => {
             console.log('update room status');
-            this.setState({roomState: data})
+            this.setState({ roomState: data })
+        })
+
+        this.state.io.on("game start", () => {
+            console.log('Game start');
+            if( this.state.userName === this.state.roomState[2])
+                this.setState({currentState: "playing", userIdinRoom: 0})
+            else
+                this.setState({currentState: "playing", userIdinRoom: 1})
         })
     }
 
     registerBtn = (name, birth) => {
-        this.setState({userName:name, userBirth: birth})
+        this.setState({ userName: name, userBirth: birth })
         // const io = socketIOClient(this.state.endpoint)
         this.state.io.emit("register", [this.state.userName, this.state.userBirth], (res) => {
             console.log('in login method');
             console.log(res);
-            
-            
+
+
             // if(res === 1){
             //     this.setState({logined:1})
             // }
@@ -88,32 +98,31 @@ class MAIN extends React.Component{
     createRoomBtn = () => {
         // TODO: replace this ugly prompt
         var roomName = prompt("Please enter the room name")
-        if(roomName !== null){
+        if (roomName !== null) {
             // const io = socketIOClient(this.state.endpoint)
             this.state.io.emit("create room", [this.state.userName, roomName], (res) => {
-                if(res !== 0){
-                    this.setState({currentState: "room", roomState: res})
+                if (res !== 0) {
+                    this.setState({ currentState: "room", roomState: res })
                 }
             })
         }
 
     }
 
-    enterRoomBtn = (roomid) =>{
+    enterRoomBtn = (roomid) => {
         // const io = socketIOClient(this.state.endpoint)
         this.state.io.emit("enter room", [this.state.userName, roomid], (res) => {
             console.log(res);
-            
-            if(res !== 0){
-                this.setState({currentState: "room", roomState: res})
+
+            if (res !== 0) {
+                this.setState({ currentState: "room", roomState: res })
             }
         })
     }
 
     autoEnterBtn = () => {
-        // const io = socketIOClient(this.state.endpoint)
         this.state.io.emit("auto enter", this.state.userName, (res) => {
-            if(res !== 0){
+            if (res !== 0) {
                 //TODO
             }
         })
@@ -121,86 +130,138 @@ class MAIN extends React.Component{
 
     leaveRoomBtn = () => {
         // TODO
-        // const io = socketIOClient(this.state.endpoint)
         this.state.io.emit("leave room", [this.state.userName, this.state.roomState[0]], (res) => {
-            if(res === 1){
-                this.setState({currentState:"lobby", roomState: 0})
+            if (res === 1) {
+                this.setState({ currentState: "lobby", roomState: 0 })
             }
         })
     }
 
     gameStartBtn = () => {
-        // TODO
+        if (this.state.roomState.length === 4) {
+            // this.setState({ currentState: "playing", userIdinRoom: 0 })
+            // if(this.state.roomState[2] === this.state.userName)
+            //     let playerId = 0
+            // else
+            //     let playerId = 1
+            let pkg = [{
+                username: this.state.roomState[2],
+                id: 0,
+                current: [],
+                currentX: 0,
+                currentY: 0,
+                initCurrentX: 5,
+                freezed: false,
+                score: 0,
+                lose: false,
+            },
+            {
+                username: this.state.roomState[3],
+                id: 1,
+                current: [],
+                currentX: 0,
+                currentY: 0,
+                initCurrentX: 10,
+                freezed: false,
+                score: 0,
+                lose: false,
+            }]
+            this.state.io.emit("start", [pkg, this.state.roomState[0]])
+        }
     }
 
-    render(){
-        if(this.state.currentState === "login"){
-            return <Login loginBtn={this.loginBtn} registerBtn={this.registerBtn}/>;
+    exitGame = (isWin) => {
+        this.setState({currentState: "room"})
+        let tmp = this.state.userData
+        if(isWin){
+            tmp.wincount += 1
         }
-        else if (this.state.currentState === "playing"){
-            return (<div>這是遊戲中的畫面</div>)
+        else{
+            tmp.losecount += 1
         }
-        else if (this.state.currentState === "lobby"){
-        return (
-            <Container>
-                <Row>
-                    <Col xs="2">
-                    <SideWin data={this.state.sideWinData}/>
-                    </Col>
-                    <Col xs="8">
-                    <Lobby userData={this.state.userData} lobbyData={this.state.lobbyData} createRoomBtn={this.createRoomBtn} enterRoomBtn={this.enterRoomBtn} autoEnterBtn={this.autoEnterBtn}/>
-                    </Col>
-                </Row>
-            </Container>)
+        this.state.io.emit("update user data", tmp)
+        this.setState({userData:tmp})
+    }
+
+    render() {
+        if (this.state.currentState === "login") {
+            return <Login loginBtn={this.loginBtn} registerBtn={this.registerBtn} />;
         }
-        else if(this.state.currentState === "room"){
-            return(
+        // else if (this.state.currentState === "playing") {
+        //     return (<div>這是遊戲中的畫面</div>)
+        // }
+        else if (this.state.currentState === "lobby") {
+            return (
                 <Container>
-                <Row>
-                    <Col xs="2">
-                    <SideWin data={this.state.sideWinData}/>
-                    </Col>
-                    <Col xs="8">
-                    <Room userData={this.state.userData} roomData={this.state.roomState} leaveRoomBtn={this.leaveRoomBtn}/>
-                    </Col>
-                </Row>
-            </Container>)
+                    <Row>
+                        <Col xs="2">
+                            <SideWin data={this.state.sideWinData} />
+                        </Col>
+                        <Col xs="8">
+                            <Lobby userData={this.state.userData} lobbyData={this.state.lobbyData} createRoomBtn={this.createRoomBtn} enterRoomBtn={this.enterRoomBtn} autoEnterBtn={this.autoEnterBtn} />
+                        </Col>
+                    </Row>
+                </Container>)
+        }
+        else if (this.state.currentState === "room") {
+            return (
+                <Container>
+                    <Row>
+                        <Col xs="2">
+                            <SideWin data={this.state.sideWinData} />
+                        </Col>
+                        <Col xs="8">
+                            <Room userData={this.state.userData} roomData={this.state.roomState} leaveRoomBtn={this.leaveRoomBtn} gameStartBtn={this.gameStartBtn} />
+                        </Col>
+                    </Row>
+                </Container>)
+        }
+        else if (this.state.currentState === "playing") {
+            let tmp = this.firstFlagForTetris
+            this.firstFlagForTetris = 0
+            return (
+                <Container>
+                    <Row>
+                        <Tetris firstFlag={tmp} exitGame={this.exitGame} playerId={this.state.userIdinRoom} roomId={this.state.roomState[0]} io={this.state.io}></Tetris>
+                    </Row>
+                </Container>
+            )
         }
     }
-    
+
 }
 
-class SideWin extends React.Component{
+class SideWin extends React.Component {
     // constructor(props){
     //     super(props)
     // }
 
-    renderList = (name) =>{
+    renderList = (name) => {
         return <div>{name}</div>
     }
 
-    render(){
+    render() {
         console.log('in render func');
-        if(this.props.data === 0){
+        if (this.props.data === 0) {
             console.log('data === 0');
-            return(
+            return (
                 <div class="side-win">
-                Loading
+                    Loading
                 </div>
             )
         }
-        else{
+        else {
             console.log("get data:")
             console.log(this.props.data)
-            return(
+            return (
                 <div className="side-win">
-                <div className="label">
-                在線名單
+                    <div className="label">
+                        在線名單
                 </div>
-                {this.props.data.map(this.renderList)}
+                    {this.props.data.map(this.renderList)}
 
-                <div>
-                    {/* <Button color="danger" onClick={this.createRoomToggle}>{this.props.buttonLabel}</Button>
+                    <div>
+                        {/* <Button color="danger" onClick={this.createRoomToggle}>{this.props.buttonLabel}</Button>
                     <Modal isOpen={this.state.createRoomModal} toggle={this.createRoomToggle} className={this.props.className} external={externalCloseBtn}>
                     <ModalHeader>Modal title</ModalHeader>
                     <ModalBody>
@@ -212,7 +273,7 @@ class SideWin extends React.Component{
                         <Button color="secondary" onClick={this.toggle}>Cancel</Button>
                     </ModalFooter>
                     </Modal> */}
-                </div>
+                    </div>
 
                 </div>
             )
@@ -221,6 +282,6 @@ class SideWin extends React.Component{
     }
 }
 
-// ReactDOM.render(<MAIN />, document.getElementById('root'));
-ReactDOM.render(<Tetris />, document.getElementById('root'));
+ReactDOM.render(<MAIN />, document.getElementById('root'));
+// ReactDOM.render(<Tetris />, document.getElementById('root'));
 registerServiceWorker();

@@ -56,7 +56,7 @@ class Room extends Component{
                     <Col sm="4">
                     <Row className="lobby-button">
                         <div>
-                            <Button outline color="secondary">遊戲開始</Button>
+                            <Button outline color="secondary" onClick={() => {this.props.gameStartBtn()}}>遊戲開始</Button>
                             <br/>
                             <Button outline color="secondary" onClick={() => {this.props.leaveRoomBtn()}}>離開房間</Button>
                         </div>

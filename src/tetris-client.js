@@ -1,6 +1,5 @@
 import React from 'react';
 import './style.css';
-import socketIOClient from "socket.io-client";
 // import {Container, Col, Row} from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -8,11 +7,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 class Tetris extends React.Component {
     constructor(props) {
         super(props)
-
         this.state = {
-            playerId: 0,
+            playerId: this.props.playerId,
+            roomId: this.props.roomId,
             endpoint: "http://127.0.0.1:3010",
-            io: socketIOClient("http://127.0.0.1:3010"),
+            // io: socketIOClient("http://127.0.0.1:3010"),
+            io: this.props.io,
             W: 480,
             H: 480,
             COLS: 16,
@@ -43,39 +43,42 @@ class Tetris extends React.Component {
         this.players = [];
         this.playersNUM = 0;
         this.freezed = false;
+        this.interval = undefined
+        this.ctx = undefined;
+        this.handler = undefined
     }
 
     drawBlock(x, y) {
-        const ctx = this.refs.canvas.getContext('2d');
-        ctx.fillRect(this.BLOCK_W * x, this.BLOCK_H * y, this.BLOCK_W - 1, this.BLOCK_H - 1);
-        ctx.strokeRect(this.BLOCK_W * x, this.BLOCK_H * y, this.BLOCK_W - 1, this.BLOCK_H - 1);
+        // const ctx = this.refs.canvas.getContext('2d');
+        this.ctx.fillRect(this.BLOCK_W * x, this.BLOCK_H * y, this.BLOCK_W - 1, this.BLOCK_H - 1);
+        this.ctx.strokeRect(this.BLOCK_W * x, this.BLOCK_H * y, this.BLOCK_W - 1, this.BLOCK_H - 1);
     }
 
     renderGame() {
-        const ctx = this.refs.canvas.getContext('2d');
-        ctx.fillStyle = "black"
-        ctx.fillRect(0, 0, this.state.W, this.state.H)
-        ctx.clearRect(1, 1, this.state.W - 2, this.state.H - 2);
+        // const ctx = this.refs.canvas.getContext('2d');
+        this.ctx.fillStyle = "black"
+        this.ctx.fillRect(0, 0, this.state.W, this.state.H)
+        this.ctx.clearRect(1, 1, this.state.W - 2, this.state.H - 2);
         // ctx.clearRect( 0, 0, W, H );
         this.drawScore()
 
-        ctx.strokeStyle = 'black';
+        this.ctx.strokeStyle = 'black';
         for (var x = 0; x < this.state.COLS; ++x) {
             for (var y = 0; y < this.state.ROWS; ++y) {
                 if (this.board[y][x]) {
-                    ctx.fillStyle = this.colors[this.board[y][x] - 1];
+                    this.ctx.fillStyle = this.colors[this.board[y][x] - 1];
                     this.drawBlock(x, y);
                 }
             }
         }
 
-        ctx.fillStyle = 'red';
-        ctx.strokeStyle = 'black';
+        this.ctx.fillStyle = 'red';
+        this.ctx.strokeStyle = 'black';
         for (var p = 0; p < this.playersNUM; p++) {
             for (var y = 0; y < 4; ++y) {
                 for (var x = 0; x < 4; ++x) {
                     if (this.players[p].current[y][x]) {
-                        ctx.fillStyle = this.colors[this.players[p].current[y][x] - 1];
+                        this.ctx.fillStyle = this.colors[this.players[p].current[y][x] - 1];
                         this.drawBlock(this.players[p].currentX + x, this.players[p].currentY + y);
                     }
                 }
@@ -84,71 +87,51 @@ class Tetris extends React.Component {
     }
 
     drawScore() {
-        const ctx = this.refs.canvas.getContext('2d');
+        // const ctx = this.refs.canvas.getContext('2d');
         // ctx.fillStyle="red";
-        ctx.clearRect(this.state.W + 20, 0, 400, 400)
-        ctx.fillStyle = "black";
+        this.ctx.clearRect(this.state.W + 20, 0, 400, 400)
+        this.ctx.fillStyle = "black";
         // ctx.fillRect( W+20, 0, 50, 50)
-        ctx.font = "30px Arial";
-        let tmp = "Score : " + this.score
-        ctx.fillText(tmp, this.state.W + 5, 25)
+        this.ctx.font = "30px Arial";
+        let tmp = "Score : " + this.players[this.state.playerId].score
+        this.ctx.fillText(tmp, this.state.W + 5, 25)
     }
 
-    init() {
-        for (var y = 0; y < this.state.ROWS; ++y) {
-            this.board[y] = [];
-            for (var x = 0; x < this.state.COLS; ++x) {
-                this.board[y][x] = 0;
-            }
-        }
+    renderGameover() {
+        // const ctx = this.refs.canvas.getContext('2d');
+        this.ctx.fillStyle = "rgba(0,0,0, 0.5)"
+        this.ctx.fillRect(0, 0, this.state.W, this.state.H)
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "30px Arial";
+        let txt = ""
+        if(this.players[this.state.playerId].lose)
+            txt = "Lose!!"
+        else
+            txt = "Win!!"
+        this.ctx.fillText(txt, this.state.W/2 - 50, this.state.H/2 - 20)
+        setTimeout(() => {
+            this.props.exitGame(!this.players[this.state.playerId].lose)
+        }, 3000);
     }
-    // newShape() {
-    //     var id = Math.floor( Math.random() * this.shapes.length );
-    //     var shape = this.shapes[ id ]; // maintain id for color filling
-
-    //     this.current = [];
-    //     for ( var y = 0; y < 4; ++y ) {
-    //         this.current[ y ] = [];
-    //         for ( var x = 0; x < 4; ++x ) {
-    //             var i = 4 * y + x;
-    //             if ( typeof shape[ i ] != 'undefined' && shape[ i ] ) {
-    //                 this.current[ y ][ x ] = id + 1;
-    //             }
-    //             else {
-    //                 this.current[ y ][ x ] = 0;
-    //             }
-    //         }
-    //     }
-
-    //     // new shape starts to move
-    //     this.freezed = false;
-    //     // position where the shape will evolve
-    //     this.currentX = 5;
-    //     this.currentY = 0;
-    // }
+   
     componentDidMount() {
-        this.init()
-        // this.newShape()
-
-        // this.renderGame(200)
-        let pkg = {
-            id: this.playerId,
-            current: this.current,
-            currentX: this.currentX,
-            currentY: this.currentY,
-            freezed: this.freezed,
-            score: this.score,
-            lose: this.lose,
-        }
-        this.state.io.emit("start", pkg)
+        console.log('canvas mounted');
+        this.ctx = this.refs.canvas.getContext('2d');
         this.state.io.on("update", (arr) => {
             this.players = arr[0];
             this.playersNUM = this.players.length
             this.board = arr[1];
             // console.log(this.board);
-
             console.log('updated!!');
-            setInterval(this.renderGame(), 60)
+            this.interval = setInterval(this.renderGame(), 60)
+
+        })
+
+        this.state.io.on("game over", (data) => {
+            this.players = data
+            clearInterval(this.interval)
+            this.renderGameover()
+            // document.removeEventListener("keydown", this._handleKeyDown);
         })
     }
 
@@ -166,59 +149,24 @@ class Tetris extends React.Component {
         if (typeof keys[e.keyCode] != 'undefined') {
             // this.keyPress(keys[e.keyCode]);
             console.log(keys[e.keyCode]);
-            
-            this.state.io.emit("move", [this.state.playerId, keys[e.keyCode]])
-
+            this.state.io.emit("move", [this.state.playerId, keys[e.keyCode], this.state.roomId])
         }
     }
 
     componentWillMount() {
-        document.addEventListener("keydown", this._handleKeyDown.bind(this));
+        if(this.props.firstFlag){
+            document.addEventListener("keydown", this._handleKeyDown.bind(this));
+        }
     }
 
     componentWillUnmount() {
         document.removeEventListener("keydown", this._handleKeyDown.bind(this));
     }
 
-    keyPress(key) {
-        // TODO: not done
-        
-        // switch ( key ) {
-        //     case 'left':
-        //         if ( valid( -1 ) ) {
-        //             --currentX;
-        //         }
-        //         break;
-        //     case 'right':
-        //         if ( valid( 1 ) ) {
-        //             ++currentX;
-        //         }
-        //         break;
-        //     case 'down':
-        //         if ( valid( 0, 1 ) ) {
-        //             ++currentY;
-        //         }
-        //         break;
-        //     case 'rotate':
-        //         var rotated = rotate( current );
-        //         if ( valid( 0, 0, rotated ) ) {
-        //             current = rotated;
-        //         }
-        //         break;
-        //     case 'drop':
-        //         while( valid(0, 1) ) {
-        //             ++currentY;
-        //         }
-        //         tick();
-        //         break;
-        // }
-    }
-
 
     render() {
-        return <div>
-            canvas test
-        <canvas ref="canvas" width={960} height={480} />
+        return <div ref="div">
+        <canvas ref="canvas" width={960} height={480}  />
         </div>
     }
 
