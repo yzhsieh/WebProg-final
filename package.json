@@ -6,6 +6,7 @@
     "async": "^2.6.1",
     "bootstrap": "^4.1.1",
     "express": "^4.16.3",
+    "gh-pages": "^1.2.0",
     "mysql": "^2.15.0",
     "mysql2": "^1.5.3",
     "npm-watch": "^0.3.0",
@@ -21,10 +22,13 @@
     "tedious": "^2.6.1"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "server": "node ./src/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  }
+  },
+  "homepage": "https://yzhsieh.github.io/WebProg-final"
 }
