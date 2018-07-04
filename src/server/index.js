@@ -464,9 +464,9 @@ io.on('connection', socket => {
 		currentUser.splice(currentUser.indexOf(user), 1)
 	})
 
-	socket.on('error', () => {
+	socket.on('error', (e) => {
 		console.log("WOOOOOO in error function")
-		console.log(console.error);
+		console.log(console.error(e.message));
 		
 	});
 

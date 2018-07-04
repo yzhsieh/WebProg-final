@@ -16,7 +16,6 @@ class MAIN extends React.Component {
         super(props)
 
         this.state = {
-            // endpoint: "http://127.0.0.1:3010",
             userName: 0,
             userBirth: 0,
             userData: 0,
@@ -24,7 +23,7 @@ class MAIN extends React.Component {
             sideWinData: 0,
             roomState: 0, // [roomId, roomName, user1, user2]
             lobbyData: 0,
-            io: socketIOClient(),
+            io: socketIOClient(undefined , { transports: [ 'websocket' ] } ),
         }
         this.firstFlagForTetris= 1
             

@@ -10,8 +10,6 @@ class Tetris extends React.Component {
         this.state = {
             playerId: this.props.playerId,
             roomId: this.props.roomId,
-            endpoint: "http://127.0.0.1:3010",
-            // io: socketIOClient("http://127.0.0.1:3010"),
             io: this.props.io,
             W: 480,
             H: 480,
