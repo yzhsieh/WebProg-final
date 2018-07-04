@@ -12,8 +12,8 @@ class Tetris extends React.Component {
             roomId: this.props.roomId,
             io: this.props.io,
             W: 480,
-            H: 600,
-            COLS: 16,
+            H: 480,
+            COLS: 20,
             ROWS: 20,
         }
         this.BLOCK_H = this.state.H / this.state.ROWS
@@ -164,7 +164,7 @@ class Tetris extends React.Component {
 
     render() {
         return <div ref="div">
-        <canvas ref="canvas" width={960} height={600}  />
+        <canvas ref="canvas" width={960} height={480}  />
         </div>
     }
     // QQ

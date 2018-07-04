@@ -47,7 +47,7 @@ var currentRoom = []
 var currentUser = []
 // var username;
 var ROWS = 20;
-var COLS = 16;
+var COLS = 20;
 var board = [];
 var shapes = [
 	[1, 1, 1, 1],
