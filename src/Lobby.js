@@ -53,7 +53,7 @@ class Lobby extends Component{
                         {this.props.lobbyData.map(this.renderList)}
                     </div>
                     <Row className="chat-win">
-                        對話框
+                        {/* 對話框 */}
                     </Row>
                     </Col>
 
