@@ -39,7 +39,7 @@ class Login extends Component{
                   <h3>Please enter your name</h3>
                   <input name="user" type="text" placeholder="user name" onChange={ this.handleChangeName }/>
                   <br/>
-                  <input name="birth" type="text" placeholder="birth in 8 digit. eg. 19941205" onChange={ this.handleChangeBirth }/>
+                  <input name="birth" type="password" placeholder="birth in 8 digit. eg. 19941205" onChange={ this.handleChangeBirth }/>
                   <br/>
                   <br/>
                   <button class="btn btn-primary" onClick={this.ClickRegister}>Register</button>

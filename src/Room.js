@@ -49,7 +49,7 @@ class Room extends Component{
                         {arr.map(this.renderList)}
                     </div>
                     <Row className="chat-win">
-                        對話框
+                        {/* 對話框 */}
                     </Row>
                     </Col>
                     
