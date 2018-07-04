@@ -21,7 +21,7 @@ var config = {
 }
 
 const conn = new mysql.createConnection(config);
-
+const WINSCORE = 800
 
 // conn.connect(
 //   function (err) { 
@@ -46,7 +46,7 @@ var currentRoom = []
 // ]
 var currentUser = []
 // var username;
-var ROWS = 16;
+var ROWS = 20;
 var COLS = 16;
 var board = [];
 var shapes = [
@@ -121,8 +121,8 @@ io.on('connection', socket => {
 	function init(players, roomId) {
 		// put all date into AGD
 		// playersNUM = players.length
-		console.log('>>>in init');
-		console.log(roomId);
+		// console.log('init');
+		// console.log(roomId);
 		AGD[roomId] = { board: [], players: players }
 		for (var y = 0; y < ROWS; ++y) {
 			AGD[roomId].board[y] = [];
@@ -135,9 +135,9 @@ io.on('connection', socket => {
 	}
 
 	function tick(roomId) {
-		console.log('in tick, roomId : ', roomId);
+		// console.log('in tick, roomId : ', roomId);
 		if (!AGD[roomId].players[0].lose && !AGD[roomId].players[1].lose) {
-			console.log(AGD[roomId]);
+			// console.log(AGD[roomId]);
 			// console.log('in tick');
 			for (var p = 0; p < 2; p++) {
 				if (valid(AGD[roomId].players[p], roomId, 0, 1)) {
@@ -193,10 +193,10 @@ io.on('connection', socket => {
 	}
 
 	function checkWin(roomId){
-		if(AGD[roomId].players[0].score >= 1000){
+		if(AGD[roomId].players[0].score >= WINSCORE){
 			AGD[roomId].players[1].lose = true
 		}
-		else if(AGD[roomId].players[1].score >= 1000){
+		else if(AGD[roomId].players[1].score >= WINSCORE){
 			AGD[roomId].players[0].lose = true
 		}
 	}
@@ -310,13 +310,13 @@ io.on('connection', socket => {
 
 
 	socket.on("move", (arr, fn) => {
-		console.log('>>> move');
+		// console.log('>>> move');
 
 		let roomId = arr[2]
 		if (AGD[roomId]) {
 			let p = AGD[roomId].players[arr[0]]
 			let key = arr[1]
-			console.log(key);
+			// console.log(key);
 
 			switch (key) {
 				case 'left':
@@ -340,7 +340,6 @@ io.on('connection', socket => {
 						p.current = rotated;
 					}
 					break;
-				// TODO : drop may have some bug
 				case 'drop':
 					while (valid(p, roomId, 0, 1)) {
 						++p.currentY;
@@ -427,7 +426,7 @@ io.on('connection', socket => {
 				fn(roomPtr)
 				io.emit("update lobby", currentRoom)
 				io.to(roomId).emit("update room", roomPtr)
-				console.log(io.sockets.adapter.rooms);
+				// console.log(io.sockets.adapter.rooms);
 
 			}
 		}

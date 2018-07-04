@@ -12,9 +12,9 @@ class Tetris extends React.Component {
             roomId: this.props.roomId,
             io: this.props.io,
             W: 480,
-            H: 480,
+            H: 600,
             COLS: 16,
-            ROWS: 16,
+            ROWS: 20,
         }
         this.BLOCK_H = this.state.H / this.state.ROWS
         this.BLOCK_W = this.state.W / this.state.COLS
