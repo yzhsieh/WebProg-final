@@ -164,7 +164,7 @@ class Tetris extends React.Component {
 
     render() {
         return <div ref="div">
-        <canvas ref="canvas" width={960} height={600}  />
+        <canvas ref="canvas" width={640} height={480}  />
         </div>
     }
     // QQ
