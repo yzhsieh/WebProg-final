@@ -1,0 +1,197 @@
+
+.login-container{
+    display: flex;
+    justify-content: center;
+}
+
+.login-win{
+    position: absolute;
+    background-color: rgba(135, 206, 250, 0.3);
+    top: 35%;
+    padding: 50px;
+    border-radius: 30px;
+}
+
+.login-win input{
+    /* border: 0; */
+    margin:6px 0;
+    width: 80%;
+}
+
+.login-win button{
+    margin: 0 10px;
+}
+
+.lobby-label{
+    height: 40px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.lobby-main .profile{
+    margin: 0 10px;
+    height: 300px;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 30px;
+}
+
+.lobby-button{
+    margin: 0 10px;
+    height: 300px;
+    border: 3px;
+    border-style: solid;
+    border-color: white;
+    border-radius: 30px;
+}
+
+/* .lobby-button div:before {
+    content: '';
+    display: inline-block;
+    vertical-align: middle ;
+    height: 100%;
+  } */
+
+.lobby-button div{
+    position: absolute;
+    top:50px;
+    width: 100%;
+    text-align: center;
+}
+
+.lobby-button button{
+    margin: 6px;
+}
+
+.profile .profile-text{
+    font-size: 20px;
+    line-height: 32px;
+}
+
+.room{
+    margin: 0 0 10px 0;
+    height: 300px;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 30px;
+}
+
+
+.player:nth-child(2){
+    background-color: rgb(136, 148, 150);
+    width: 50%;
+    display: inline-block;
+    border: 3px;
+    border-right-style: solid;
+    border-color: black;
+    overflow: hidden;
+    border-bottom-left-radius: 30px
+}
+
+.player:nth-child(3){
+    border-bottom-right-radius: 30px;
+}
+
+
+.player{
+    background-color: rgb(171, 187, 187);
+    height: 254px;
+    width: 50%;
+    display: inline-block;
+    border: 0px;
+    border-style: solid;
+    border-color: black;
+    overflow: hidden;
+    font-size: 40px;
+    text-align: center;
+}
+
+.player:before {
+    content: '';
+    display: inline-block;
+    vertical-align: middle ;
+    height: 100%;
+  }
+
+.lobby-main .room-list{
+    margin: 0 0 10px 0;
+    height: 300px;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 30px;
+}
+
+.room-item:first-child{
+    border-top-right-radius: 30px;
+    border-top-left-radius: 30px;
+}
+
+.room-item{
+    margin: 0 !important; 
+    height: 30px;
+    border-style: solid;
+    background-color: lightgray;
+    border-color: black;
+    border: 1px;
+}
+
+.room-item:hover{
+    background-color: rgb(151, 151, 151);
+    border-color: black;
+    border: 3px
+}
+
+.lobby-main .chat-win{
+    margin: 0 0 10px 0;
+    height: 300px;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 30px;
+}
+
+.side-win{
+    height: 600px;
+    border: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 30px;
+}
+
+
+.label:before {
+    content: '';
+    display: inline-block;
+    vertical-align: middle ;
+    height: 100%;
+  }
+
+.label{
+    padding: 0 30px 0 10px;
+    text-align: middle;
+    background-color: white;
+    border-top-right-radius: 30px;
+    border-top-left-radius: 30px;
+    height: 40px;
+    border-bottom: 3px solid darkgray;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    color: blue;
+}
+
+
+.blue{
+  background-color: blue;
+}
+
+.green{
+    background-color: green;
+  }
+
+  .yellow{
+      background-color: yellow;
+  }
