@@ -7,8 +7,8 @@ class Login extends Component{
     constructor(props){
         super(props);
         this.state = {
-            username : "Jack",
-            userBirth: 19941205,
+            username : "",
+            userBirth: 0,
         }
     }
 
