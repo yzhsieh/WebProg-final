@@ -463,6 +463,13 @@ io.on('connection', socket => {
 		console.log(user, 'disconnected')
 		currentUser.splice(currentUser.indexOf(user), 1)
 	})
+
+	socket.on('error', () => {
+		console.log("WOOOOOO in error function")
+		console.log(console.error);
+		
+	});
+
 })
 
 /////////
