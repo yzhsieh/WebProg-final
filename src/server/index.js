@@ -82,7 +82,6 @@ var roomId = undefined;
 
 
 getRoomById = (id) => {
-	// TEST 
 	for (let i = 0; i < currentRoom.length; i++) {
 		if (currentRoom[i][0] == id)
 			return currentRoom[i]
@@ -181,6 +180,7 @@ io.on('connection', socket => {
 		}
 		p.freezed = true;
 		p.score += 10;
+		checkWin(roomId)
 		//TODO : insert lost condiction here
 		if (p.currentY == 0) {
 			p.lose = true
@@ -192,9 +192,14 @@ io.on('connection', socket => {
 		}
 	}
 
-	////////// function for tetris game /////////
-
-
+	function checkWin(roomId){
+		if(AGD[roomId].players[0].score >= 1000){
+			AGD[roomId].players[1].lose = true
+		}
+		else if(AGD[roomId].players[1].score >= 1000){
+			AGD[roomId].players[0].lose = true
+		}
+	}
 
 	function newShape(p) {
 		var id = Math.floor(Math.random() * shapes.length);
@@ -270,7 +275,7 @@ io.on('connection', socket => {
 				}
 				++y;
 				p.score += 100
-
+				checkWin(roomId)
 			}
 		}
 	}
@@ -353,7 +358,7 @@ io.on('connection', socket => {
 		conn.query(sql, (err, res) =>{
 			if(err) throw err;
 			console.log('in update user data');
-			console.log(res);
+			console.log(d);
 		})
 
 	}))
