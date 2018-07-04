@@ -97,9 +97,9 @@ class Tetris extends React.Component {
 
     renderGameover() {
         // const ctx = this.refs.canvas.getContext('2d');
-        this.ctx.fillStyle = "rgba(0,0,0, 0.5)"
+        this.ctx.fillStyle = "rgba(0,0,0, 0.7)"
         this.ctx.fillRect(0, 0, this.state.W, this.state.H)
-        this.ctx.fillStyle = "black";
+        this.ctx.fillStyle = "white";
         this.ctx.font = "30px Arial";
         let txt = ""
         if(this.players[this.state.playerId].lose)

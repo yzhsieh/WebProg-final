@@ -1,4 +1,15 @@
-# Final
+# WebProg Final - Trtris 線上對戰系統
+
+
+
+## final presentation
+Demo link : https://youtu.be/fSjUkLFYrIQ
+
+
+### 心得：
+原先以為只是單純的俄羅斯方塊，難度不會很高，因此選擇自幹。結果沒想到在處理多人遊戲
+
+
 ## in class hackathon (06/06)
 ### 題目：會員系統以及大廳系統
 說明：
