@@ -221,7 +221,9 @@ class MAIN extends React.Component {
             return (
                 <Container>
                     <Row>
+                        <Col>
                         <Tetris firstFlag={tmp} exitGame={this.exitGame} playerId={this.state.userIdinRoom} roomId={this.state.roomState[0]} io={this.state.io}></Tetris>
+                        </Col>
                     </Row>
                 </Container>
             )
