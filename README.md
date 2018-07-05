@@ -3,8 +3,9 @@
 
 
 ## 07/05 final presentation
-Github link : 
-Demo link :
+Github link :  https://github.com/yzhsieh/WebProg-final/tree/final
+Demo link : https://webprog-tetris-fullstack.herokuapp.com/
+(網站極不穩定，若助教測試時是掛掉的請跟我說一聲><)
 Demo video link : https://youtu.be/fSjUkLFYrIQ
 
 ### 功能說明：
